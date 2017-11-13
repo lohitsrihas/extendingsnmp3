@@ -11,6 +11,9 @@ import requests
 import sys
 import re
 
+
+global time_arg
+
 oid = " ".join(sys.argv[3:])
 freq_arg = sys.argv[2]
 args = sys.argv[1]
@@ -24,41 +27,42 @@ while i<len(oid):
 
 proc = subprocess.Popen(mylist, stdout=subprocess.PIPE)
 
+time_arg = 0
+time_arg1 = ''
 while True: 
 	line = proc.stdout.readline()
 	sys.stdout.flush()
 	if not line: break
 	sys.stdout.flush()
 	line = line.rstrip()
-	fine = line.split(' | ')
-#	time_arg = 0
-#	time_arg1 = fine[0].rstrip()
-#	print(time_arg1)
-#	time_arg = float(time_arg1)
-	time_arg = fine[0]
-#	time_arg = int(time_arg1)
+	fine = line.split('|')
+
+
+
+	time_arg = fine[0]	
+
+	time_arg = time_arg.rstrip()
+
 	oid_id = []
 	oid_value = []
 	i = 1
 	str_i = ''
 	while i<len(fine):
-		int_value = float(fine[i])
-		int_value = int(int_value)
+		int_value = int(fine[i].rstrip())
+
 		oid_value.append(int_value)
 		oid_id.append("OID%d"%i)
 		i+=1
 	url_string = 'http://127.0.0.1:8086/write?db=A3'
 #	data_string = 'rate,OID\'s=server01 value=0.64 1434055562000000000'
 	j = 0
-	data_string = ""
+	data_string = "" 
 	while j<len(oid_id):
-		string = 'rate,OID\'s=%s value=%d %s'%(oid_id[j], oid_value[j], time_arg)
+		string = "rate,OID\'s=%s value=%d %s"%(oid_id[j], oid_value[j], time_arg)
 		string+= "\n"
 		data_string+= string
 		j+=1
 	r = requests.post(url_string, data=data_string)
-
+	time.sleep(0.2)
 	
 	print(line)
-
-

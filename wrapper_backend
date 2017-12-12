@@ -10,6 +10,7 @@ import subprocess
 import requests
 import sys
 import re
+import os
 
 
 time_arg = ''
@@ -19,7 +20,7 @@ oid = " ".join(sys.argv[3:])
 freq_arg = sys.argv[2]
 args = sys.argv[1]
 
-mylist = ["python", "prober", args, freq_arg, "-1"]
+mylist = ["python", "/tmp/A2/prober", args, freq_arg, "-1"]
 oid = oid.split(' ')
 i = 0
 while i<len(oid):
@@ -28,57 +29,53 @@ while i<len(oid):
 
 proc = subprocess.Popen(mylist, stdout=subprocess.PIPE)
 
-
-while True: 
+while True:
 	line = proc.stdout.readline()
-	if not line: break
+#	if not line: break
 #	if line == " ": break
 	sys.stdout.flush()
 	line = line.rstrip()
 	print(line)
-	fine = line.replace(' | ',',')
-	
-	fine = fine.split(',')
-#	fine = fine.rstrip()
-#	if fine[0] == "  ": break
-	if re.match(r'^\s*$', line):
-		pass
-	else:
-#		print ("*",fine[0],"*")
+	if(line.find("|") != -1):
+		fine = line.replace(' | ','|')
+		fine = fine.split('|')
 		time_arg = fine[0]	
-		
 		time_arg = time_arg.rstrip()
-#		time_arg = time_arg.replace(' ','')
-	#	print (time_arg)
-		
 		time_arg1 = float (time_arg)
 		time_arg1 = int (time_arg1)
-		oid_id = []
+	#	oid_id = []
 		oid_value = []
-		i = 1
+		l = 1
 		str_i = ''
-		f= open("oid_value.txt","w+")
-		while i<len(fine):
-			int_value = int(fine[i].rstrip())
-	
+#		f= open("oid_value.txt","w+")
+		while l<len(fine):
+			int_value = int(fine[l].rstrip())
 			oid_value.append(int_value)
-			oid_id.append("OID%d"%i)
-			i+=1
-		url_string = "curl -i -XPOST 'http://127.0.0.1:8086/write?db=A3&precision=s&u=ats&atslabb00' "
+	#		oid_id.append(oid[l])
+			l+=1
+	#	url_string = "curl -i -XPOST 'http://127.0.0.1:8086/write?db=A3&u=ats&atslabb00&precision=s' "
 	#	data_string = 'rate,OID\'s=server01 value=0.64 1434055562000000000'
 		j = 0
-		data_string = "rate," 
-		while j<len(oid_id):
-			string = "oid=%s value=%.0f %d"%(oid_id[j], float(oid_value[j]), int(time_arg1))
-			string+= "\n"
-			data_string+= string
-			j+=1
-		f.write(data_string)
-		cmd = url_string+" --data-binary @oid_value.txt"
+#		data_string = "rate," 
+#		while j<len(oid_value):
+#			string = "oid=%s value=%.2f %i"%(oid[j], float(oid_value[j]), int(time_arg1))
+#			if(j==(len(oid_value)-1)):
+#				pass
+#			else:
+#				string+= "\n"
+#			data_string+= string
+#			j+=1
+	#	f.write(data_string)
+	#	cmd = url_string+" --data-binary @oid_value.txt"
 	#	cmd = url_string+" --data-binary 'rate,"+data_string+"'"
-	 	print (cmd)
-		subprocess.Popen(cmd,shell=True)
+		while j<len(oid_value):
+			cmd = "curl -XPOST 'http://127.0.0.1:8086/write?db=A3&u=ats&atslabb00&precision=s' --data-binary 'rate,oid=%s value=%.0f %i'"%(oid[j], float(oid_value[j]), int(time_arg1))
+			j+=1
+#		 	print (cmd)
+			os.system(cmd)
+#			subprocess.Popen(cmd,shell=True)
 	#	r = requests.post(url_string, data=data_string)
 	#	time.sleep(0.2)
-		f.close()
-		#print(line)
+	#	f.close()
+	else:
+		pass	
